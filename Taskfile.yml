@@ -199,9 +199,12 @@ tasks:
   dev:restartd:
     deps: [__dev:ensure-running]
     cmds:
+      # As the splunk user: as the image's default user (ansible) the restart
+      # stops at a "change ports? [y/n]" prompt and exits 1 without restarting.
+      # `restart splunkd` returns in ~50 s on 10.2.1 and 10.4 and leaves REST up.
       - task: __dev-compose
-        vars: { COMPOSE_ARGS: 'exec {{.SPLUNK_SERVICE}} bash -lc "{{.SPLUNK_BIN}} restart -auth admin:\$SPLUNK_PASSWORD"' }
-    desc: Restart splunkd process inside running container (~10s)
+        vars: { COMPOSE_ARGS: 'exec -u splunk {{.SPLUNK_SERVICE}} {{.SPLUNK_BIN}} restart splunkd' }
+    desc: Restart splunkd inside the running container (~50s); picks up REST handler and bin/ changes
 
   dev:refresh:
     deps: [__dev:ensure-running]
