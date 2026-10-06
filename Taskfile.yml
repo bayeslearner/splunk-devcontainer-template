@@ -899,7 +899,7 @@ tasks:
           exit 1
         fi
         infra/scripts/appinspect.sh "${APP_DIR}"
-    desc: Run Splunk AppInspect (cloud + private_app + aarch64_compatibility) on the UCC build output; fails on any failure, error, or missing report
+    desc: Run Splunk AppInspect (cloud + private_app) on the UCC build output; fails on any failure, error, or missing report
 
   # ── Python Tooling ───────────────────────────────────────────────────
 
