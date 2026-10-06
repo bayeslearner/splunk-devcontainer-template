@@ -38,11 +38,13 @@ services:
       ANSIBLE_SYSTEM_WARNINGS: "false"
       ANSIBLE_ACTION_WARNINGS: "false"
       ANSIBLE_PIPELINING: "true"
+    # Host ports are a shared resource across checkouts; set them per checkout
+    # in .env. The Taskfile's port preflight names the container holding one.
     ports:
-      - "8000:8000"   # Splunk Web
-      - "8089:8089"   # splunkd REST API
-      - "8088:8088"   # HTTP Event Collector
-      - "5678:5678"   # Python debugpy (SA-VSCode remote debugging)
+      - "${SPLUNK_WEB_PORT:-8000}:8000"     # Splunk Web
+      - "${SPLUNK_API_PORT:-8089}:8089"     # splunkd REST API
+      - "${SPLUNK_HEC_PORT:-8088}:8088"     # HTTP Event Collector
+      - "${SPLUNK_DEBUG_PORT:-5678}:5678"   # Python debugpy (SA-VSCode remote debugging)
     volumes:
       # Staging area for tarballs (app:provision installs from here)
       - ${LOCAL_WORKSPACE_FOLDER:-..}/infra/deps:/tmp/apps

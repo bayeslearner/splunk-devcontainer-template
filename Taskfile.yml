@@ -117,6 +117,27 @@ tasks:
           exit 1
         fi
 
+  __preflight-ports:
+    internal: true
+    cmds:
+      - |
+        # Ports are the one resource the compose project name does not isolate.
+        # Name the container that already publishes one of ours and the fix,
+        # instead of compose's bare "port is already allocated".
+        for PAIR in "${SPLUNK_WEB_PORT:-8000}:SPLUNK_WEB_PORT" \
+                    "${SPLUNK_API_PORT:-8089}:SPLUNK_API_PORT" \
+                    "${SPLUNK_HEC_PORT:-8088}:SPLUNK_HEC_PORT" \
+                    "${SPLUNK_DEBUG_PORT:-5678}:SPLUNK_DEBUG_PORT"; do
+          PORT=${PAIR%%:*}; VAR=${PAIR##*:}
+          HOLDER=$(docker ps --filter "publish=${PORT}" --format '{{`{{.Names}}`}}' \
+                   | grep -v "^{{.SPLUNK_CONTAINER}}$" | head -1)
+          if [ -n "$HOLDER" ]; then
+            echo "ERROR: host port ${PORT} is already published by container '${HOLDER}'."
+            echo "  Stop it, or set ${VAR} to a free port in .env, then: task dev:up"
+            exit 1
+          fi
+        done
+
   __wait-healthy:
     internal: true
     cmds:
@@ -148,7 +169,7 @@ tasks:
     desc: Build the dev Splunk Docker image
 
   dev:up:
-    deps: [__ensure-image]
+    deps: [__ensure-image, __preflight-ports]
     cmds:
       - task: __dev-compose
         vars: { COMPOSE_ARGS: 'up -d' }

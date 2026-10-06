@@ -31,9 +31,9 @@ services:
       ANSIBLE_ACTION_WARNINGS: "false"
       ANSIBLE_PIPELINING: "true"
     ports:
-      - "18000:8000"   # Splunk Web (staging)
-      - "18089:8089"   # splunkd REST API (staging)
-      - "18088:8088"   # HTTP Event Collector (staging)
+      - "${STAGING_WEB_PORT:-18000}:8000"   # Splunk Web (staging)
+      - "${STAGING_API_PORT:-18089}:8089"   # splunkd REST API (staging)
+      - "${STAGING_HEC_PORT:-18088}:8088"   # HTTP Event Collector (staging)
     volumes:
       # Packaged apps — entrypoint auto-discovers *.tgz and installs on first start
       - ${LOCAL_WORKSPACE_FOLDER:-..}/infra/deps:/tmp/apps
