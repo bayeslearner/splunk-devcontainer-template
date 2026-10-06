@@ -63,7 +63,7 @@ services:
       # App source directories — symlinked into /opt/splunk/etc/apps/ by app:sync-links
       - ${LOCAL_WORKSPACE_FOLDER:-..}/infra/config:/opt/splunk/dev-apps
       # React source — mounted so stage/ symlinks resolve inside container (react:link)
-      - ${LOCAL_WORKSPACE_FOLDER:-..}/apps:/opt/splunk/react
+      - ${LOCAL_WORKSPACE_FOLDER:-..}/react:/opt/splunk/react
       # UCC build output — symlinked into etc/apps/ by ucc:link (same pattern as dev-apps, react)
       - ${LOCAL_WORKSPACE_FOLDER:-..}/output:/opt/splunk/ucc-apps
     restart: unless-stopped

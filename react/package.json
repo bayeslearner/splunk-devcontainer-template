@@ -9,7 +9,7 @@
     "lint": "yarn workspaces run lint",
     "setup": "yarn && yarn build",
     "test": "yarn workspaces run test",
-    "start": "yarn workspace @splunk/urc-app run start"
+    "start": "yarn workspaces run start"
   },
   "devDependencies": {
     "@splunk/create": "^10.3.0",

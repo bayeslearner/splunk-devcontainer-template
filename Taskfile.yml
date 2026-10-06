@@ -18,7 +18,7 @@ vars:
   STAGING_CONTAINER: '{{.STAGING_CONTAINER_NAME | default "splunk-staging"}}'
   IMAGE_TAG: '{{.SPLUNK_IMAGE | default "devcontainer-splunk:latest"}}'
   STAGING_SERVICE: 'splunk-staging'
-  REACT_PACKAGES_DIR: 'apps'
+  REACT_PACKAGES_DIR: 'react'
   UCC_SRC_DIR: 'apps'
   UCC_OUTPUT_DIR: 'output'
 
@@ -868,6 +868,14 @@ tasks:
     deps: [__ucc:resolve]
     cmds:
       - task: ucc:build
+      # ucc:build regenerates the output with --overwrite, which drops any React pages
+      # merged earlier; merge them again so the package carries what ucc:dev showed.
+      - |
+        if ls {{.REACT_PACKAGES_DIR}}/packages/*/stage >/dev/null 2>&1; then
+          task ucc:merge-react
+        else
+          echo "No React stage/ under {{.REACT_PACKAGES_DIR}}/packages — packaging the UCC output alone."
+        fi
       - |
         . .task/ucc-env
         OUTPUT_APP="{{.UCC_OUTPUT_DIR}}/${UCC_ADDON}"
@@ -897,18 +905,24 @@ tasks:
 
   python:lint:
     cmds:
-      - ruff check {{.CONFIG_APPS_DIR}} || true
-    desc: Lint Python code in infra/config/ with ruff
+      # Fails on findings: a lint that cannot fail is not a gate.
+      - ruff check {{.UCC_SRC_DIR}} {{.CONFIG_APPS_DIR}}
+    desc: Lint Python in apps/ (UCC source) and infra/config/ with ruff; fails on findings
 
   python:format:
     cmds:
-      - ruff format {{.CONFIG_APPS_DIR}} || true
-    desc: Format Python code in infra/config/ with ruff
+      - ruff format {{.UCC_SRC_DIR}} {{.CONFIG_APPS_DIR}}
+    desc: Format Python in apps/ and infra/config/ with ruff
 
   python:test:
     cmds:
-      - pytest {{.CONFIG_APPS_DIR}} || echo "No tests found or pytest not installed"
-    desc: Run Python tests with pytest
+      - |
+        # pytest exits 5 when it collects no tests; that is "nothing to run", not a failure.
+        # Any other non-zero exit (failures, errors, missing pytest) fails the task.
+        pytest {{.UCC_SRC_DIR}} {{.CONFIG_APPS_DIR}}; rc=$?
+        if [ "$rc" = 5 ]; then echo "python:test: no tests collected"; exit 0; fi
+        exit "$rc"
+    desc: Run pytest over apps/ and infra/config/; passes with no tests, fails on failures
 
   # ── Testing ─────────────────────────────────────────────────────────
 
