@@ -33,6 +33,12 @@ services:
       # Emulated amd64 on Apple Silicon has no AVX; the entrypoint wrapper
       # writes this into splunk-launch.conf, which is the only place it works.
       SPLUNK_SKIP_PREINSTALL_CPU_CHECKS_CORRUPTING_DATA_IF_UNSUPPORTED: "1"
+    # splunkd opens many files (buckets, sockets); the image's default of 1024
+    # is low enough to show up as search and KV Store errors.
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     ports:
       - "${STAGING_WEB_PORT:-18000}:8000"   # Splunk Web (staging)
       - "${STAGING_API_PORT:-18089}:8089"   # splunkd REST API (staging)
