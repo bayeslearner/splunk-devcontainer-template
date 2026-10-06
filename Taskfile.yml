@@ -744,34 +744,9 @@ tasks:
           -o "{{.UCC_OUTPUT_DIR}}" \
           --overwrite
 
-        # Post-build cleanup
-        APP="{{.UCC_OUTPUT_DIR}}/${UCC_ADDON}"
-        find "${APP}" -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-        find "${APP}" -name ".*" -not -name ".gitkeep" -delete 2>/dev/null || true
-        find "${APP}/lib" -type d -name tests -exec rm -rf {} + 2>/dev/null || true
-        find "${APP}/lib" -type d -name test -exec rm -rf {} + 2>/dev/null || true
-        rm -rf "${APP}/lib/bin" 2>/dev/null
-
-        # Strip all .so files — pure Python only, portable across all platforms
-        find "${APP}/lib" -name "*.so" -delete 2>/dev/null || true
-
-        # Merge custom conf fragments from package/default.d/ into UCC output.
-        # UCC generates restmap.conf, web.conf, etc. — custom entries go in
-        # default.d/ to avoid overwriting UCC output via package/default/.
-        FRAGMENTS="${UCC_PATH}/package/default.d"
-        if [ -d "${FRAGMENTS}" ]; then
-          for frag in "${FRAGMENTS}"/*.conf; do
-            [ -f "${frag}" ] || continue
-            target="${APP}/default/$(basename "${frag}")"
-            echo "" >> "${target}"
-            cat "${frag}" >> "${target}"
-            echo "  Merged fragment: $(basename "${frag}")"
-          done
-        fi
-
-        # Remove local/ and local.meta from build output (created at dev-time, fails AppInspect)
-        rm -rf "${APP}/local" 2>/dev/null
-        rm -f "${APP}/metadata/local.meta" 2>/dev/null
+        # Post-build fixups: one script shared with CI (cleanup, fragment merge from
+        # package/default.d/, python.required, local/ removal). PYTHON_REQUIRED overrides 3.9.
+        infra/scripts/ucc-fixups.sh "{{.UCC_OUTPUT_DIR}}/${UCC_ADDON}" "${UCC_PATH}/package/default.d"
 
         echo "Build complete → {{.UCC_OUTPUT_DIR}}/${UCC_ADDON}/"
     desc: Build UCC add-on (generates REST handlers, UI, conf files)

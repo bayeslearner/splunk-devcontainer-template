@@ -49,31 +49,12 @@ jobs:
       - name: Post-build fixups
         run: |
           APP="output/${{ steps.find.outputs.app_name }}"
-          FRAG_DIR="${{ steps.find.outputs.app_dir }}/package/default.d"
-          if [ -d "${FRAG_DIR}" ]; then
-            for frag in "${FRAG_DIR}"/*.conf; do
-              [ -f "${frag}" ] || continue
-              target="${APP}/default/$(basename "${frag}")"
-              echo "" >> "${target}"
-              cat "${frag}" >> "${target}"
-            done
-          fi
-          for conf in "${APP}/default/restmap.conf" "${APP}/default/inputs.conf"; do
-            if [ -f "${conf}" ]; then
-              sed -i '/^python\.version\s*=/a python.required = 3.9' "${conf}"
-            fi
-          done
+          infra/scripts/ucc-fixups.sh "${APP}" "${{ steps.find.outputs.app_dir }}/package/default.d"
           sed -i "s/^version\s*=.*/version = ${{ steps.meta.outputs.version }}/" "${APP}/default/app.conf"
 
       - name: Run AppInspect
         run: |
-          splunk-appinspect inspect "output/${{ steps.find.outputs.app_name }}" \
-            --mode precert \
-            --included-tags cloud 2>&1 | tee appinspect.log
-          if grep -qE "^\s+error:\s+[1-9]|^\s+failure:\s+[1-9]" appinspect.log; then
-            echo "AppInspect found errors or failures"
-            exit 1
-          fi
+          infra/scripts/appinspect.sh "output/${{ steps.find.outputs.app_name }}"
 
       - name: Package tarball
         run: |

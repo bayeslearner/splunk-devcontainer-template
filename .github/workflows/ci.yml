@@ -55,23 +55,7 @@ jobs:
       - name: Post-build fixups
         if: steps.find.outputs.skip != 'true'
         run: |
-          APP="output/${{ steps.find.outputs.app_name }}"
-          # Merge conf fragments
-          FRAG_DIR="${{ steps.find.outputs.app_dir }}/package/default.d"
-          if [ -d "${FRAG_DIR}" ]; then
-            for frag in "${FRAG_DIR}"/*.conf; do
-              [ -f "${frag}" ] || continue
-              target="${APP}/default/$(basename "${frag}")"
-              echo "" >> "${target}"
-              cat "${frag}" >> "${target}"
-            done
-          fi
-          # Add python.required for Splunk 10.2+
-          for conf in "${APP}/default/restmap.conf" "${APP}/default/inputs.conf"; do
-            if [ -f "${conf}" ]; then
-              sed -i '/^python\.version\s*=/a python.required = 3.9' "${conf}"
-            fi
-          done
+          infra/scripts/ucc-fixups.sh "output/${{ steps.find.outputs.app_name }}" "${{ steps.find.outputs.app_dir }}/package/default.d"
 
       - name: Install AppInspect
         if: steps.find.outputs.skip != 'true'
@@ -80,10 +64,4 @@ jobs:
       - name: Run AppInspect
         if: steps.find.outputs.skip != 'true'
         run: |
-          splunk-appinspect inspect "output/${{ steps.find.outputs.app_name }}" \
-            --mode precert \
-            --included-tags cloud 2>&1 | tee appinspect.log
-          if grep -qE "^\s+error:\s+[1-9]|^\s+failure:\s+[1-9]" appinspect.log; then
-            echo "AppInspect found errors or failures"
-            exit 1
-          fi
+          infra/scripts/appinspect.sh "output/${{ steps.find.outputs.app_name }}"
