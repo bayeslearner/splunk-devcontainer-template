@@ -912,23 +912,8 @@ tasks:
           echo "UCC output not found. Run: task ucc:build"
           exit 1
         fi
-        echo "Running AppInspect on ${APP_DIR} ..."
-        splunk-appinspect inspect "${APP_DIR}" --mode precert \
-          --included-tags cloud 2>&1 | tee /tmp/appinspect-output.txt
-        echo ""
-        # Extract summary
-        echo "=== Summary ==="
-        grep -E "error:|failure:|warning:|success:|Total:" /tmp/appinspect-output.txt
-        echo ""
-        # Show failures if any
-        FAILURES=$(grep -c "FAILURE:" /tmp/appinspect-output.txt || true)
-        if [ "$FAILURES" -gt 0 ]; then
-          echo "=== Failures ==="
-          grep -B1 -A3 "FAILURE:" /tmp/appinspect-output.txt
-          exit 1
-        fi
-        echo "All checks passed."
-    desc: Run Splunk AppInspect on UCC build output (precert mode)
+        infra/scripts/appinspect.sh "${APP_DIR}"
+    desc: Run Splunk AppInspect (cloud + private_app + aarch64_compatibility) on the UCC build output; fails on any failure, error, or missing report
 
   # ── Python Tooling ───────────────────────────────────────────────────
 
