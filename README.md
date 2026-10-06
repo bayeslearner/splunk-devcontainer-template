@@ -12,7 +12,7 @@ A Docker-out-of-Docker development environment for building Splunk applications.
 
 2. **Reopen in Container** — click the prompt or use Command Palette → *Dev Containers: Reopen in Container*
 
-3. **Configure** — edit `.env` (created from `splunk.env.example` on first run):
+3. **Configure** — edit `.env` (created from `.env.example` on first run):
    ```bash
    SPLUNK_PASSWORD=admin123   # required
    APP_NAME=my_app            # optional default for tasks

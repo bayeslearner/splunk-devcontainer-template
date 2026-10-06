@@ -2,6 +2,15 @@
 # Start with: task splunk:up
 # Apps in infra/config/ are bind-mounted to /opt/splunk/dev-apps/ and
 # symlinked into /opt/splunk/etc/apps/ by: task app:sync-links
+#
+# Isolation: the compose project name prefixes the network and every named
+# volume, so two checkouts of this template (or two apps built from it) only
+# share state when they share COMPOSE_PROJECT_NAME. Without `name:` every
+# checkout was project "devcontainer" and all of them shared splunk-var and
+# splunk-etc. Set COMPOSE_PROJECT_NAME, DEV_CONTAINER_NAME and SPLUNK_IMAGE in
+# .env per checkout; the defaults keep existing checkouts on their old names.
+
+name: ${COMPOSE_PROJECT_NAME:-devcontainer}
 
 services:
   splunk:
@@ -12,8 +21,11 @@ services:
       target: dev
       args:
         SPLUNK_VERSION: ${SPLUNK_VERSION:-10.2.1}
-    container_name: splunk-dev
-    hostname: splunk-dev
+    # Explicit tag so the built image has a known name regardless of the
+    # project name; the Taskfile's image guard checks this same tag.
+    image: ${SPLUNK_IMAGE:-devcontainer-splunk:latest}
+    container_name: ${DEV_CONTAINER_NAME:-splunk-dev}
+    hostname: ${DEV_CONTAINER_NAME:-splunk-dev}
     environment:
       SPLUNK_START_ARGS: --accept-license
       SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com

@@ -5,6 +5,10 @@
 # Runs on different ports so dev and staging can coexist.
 # Start with: task splunk:up-staging
 # Stop with:  task splunk:down-staging
+# Same compose project as the dev file (see its header), so dev and staging of
+# one checkout live together and two checkouts stay apart.
+
+name: ${COMPOSE_PROJECT_NAME:-devcontainer}
 
 services:
   splunk-staging:
@@ -15,8 +19,9 @@ services:
       target: dev
       args:
         SPLUNK_VERSION: ${SPLUNK_VERSION:-10.2.1}
-    container_name: splunk-staging
-    hostname: splunk-staging
+    image: ${SPLUNK_IMAGE:-devcontainer-splunk:latest}
+    container_name: ${STAGING_CONTAINER_NAME:-splunk-staging}
+    hostname: ${STAGING_CONTAINER_NAME:-splunk-staging}
     environment:
       SPLUNK_START_ARGS: --accept-license
       SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com

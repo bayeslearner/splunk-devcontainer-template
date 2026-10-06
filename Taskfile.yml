@@ -12,8 +12,11 @@ vars:
   COMPOSE_STAGING_FILE: '.devcontainer/docker-compose.staging.yml'
   STAGE_DIR: 'infra/deps'
   SPLUNK_BIN: '/opt/splunk/bin/splunk'
-  SPLUNK_CONTAINER: 'splunk-dev'
-  STAGING_CONTAINER: 'splunk-staging'
+  # Per-checkout names come from .env (see .env.example) and must match what
+  # the compose files interpolate; the defaults are the compose defaults.
+  SPLUNK_CONTAINER: '{{.DEV_CONTAINER_NAME | default "splunk-dev"}}'
+  STAGING_CONTAINER: '{{.STAGING_CONTAINER_NAME | default "splunk-staging"}}'
+  IMAGE_TAG: '{{.SPLUNK_IMAGE | default "devcontainer-splunk:latest"}}'
   STAGING_SERVICE: 'splunk-staging'
   REACT_PACKAGES_DIR: 'apps'
   UCC_SRC_DIR: 'apps'
@@ -109,7 +112,7 @@ tasks:
     internal: true
     cmds:
       - |
-        if ! docker images -q devcontainer-splunk:latest 2>/dev/null | grep -q .; then
+        if ! docker images -q {{.IMAGE_TAG}} 2>/dev/null | grep -q .; then
           echo "ERROR: Splunk image not built. Run: task dev:build-image"
           exit 1
         fi
@@ -957,13 +960,9 @@ tasks:
     cmds:
       - |
         if [ ! -f "{{.ENV_FILE}}" ]; then
-          if [ -f "splunk.env.example" ]; then
-            cp splunk.env.example "{{.ENV_FILE}}"
-            echo ".env created from splunk.env.example"
-          else
-            echo "No splunk.env.example found"
-          fi
+          cp .env.example "{{.ENV_FILE}}"
+          echo ".env created from .env.example"
         else
           echo ".env already exists"
         fi
-    desc: Create .env from splunk.env.example (idempotent — skips if exists)
+    desc: Create .env from .env.example (idempotent — skips if exists)

@@ -25,9 +25,9 @@ echo "Installing Python tools (appinspect, ruff, pytest, ucc-gen, codegen)..."
 pip install --user --quiet splunk-appinspect ruff pytest splunk-add-on-ucc-framework datamodel-code-generator 2>/dev/null
 
 # ── Create .env from example if missing ──────────────────────────────
-if [ ! -f /workspace/.env ] && [ -f /workspace/splunk.env.example ]; then
-  cp /workspace/splunk.env.example /workspace/.env
-  echo ".env created from splunk.env.example"
+if [ ! -f /workspace/.env ] && [ -f /workspace/.env.example ]; then
+  cp /workspace/.env.example /workspace/.env
+  echo ".env created from .env.example"
 fi
 
 # ── Ensure directory structure ───────────────────────────────────────
