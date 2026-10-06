@@ -30,6 +30,9 @@ services:
       ANSIBLE_SYSTEM_WARNINGS: "false"
       ANSIBLE_ACTION_WARNINGS: "false"
       ANSIBLE_PIPELINING: "true"
+      # Emulated amd64 on Apple Silicon has no AVX; the entrypoint wrapper
+      # writes this into splunk-launch.conf, which is the only place it works.
+      SPLUNK_SKIP_PREINSTALL_CPU_CHECKS_CORRUPTING_DATA_IF_UNSUPPORTED: "1"
     ports:
       - "${STAGING_WEB_PORT:-18000}:8000"   # Splunk Web (staging)
       - "${STAGING_API_PORT:-18089}:8089"   # splunkd REST API (staging)

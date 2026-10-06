@@ -149,8 +149,35 @@ start_with_provision() {
     wait $STOCK_PID
 }
 
+# ── Emulated CPU: skip the upgrade precheck ──────────────────────────
+# On Apple Silicon the amd64 image runs under emulation with no AVX, and the
+# second start on an existing etc volume runs Splunk's upgrade precheck, which
+# fails on "CPU Info" and leaves the container restart-looping. The setting
+# has to be in splunk-launch.conf: the compose environment does not reach
+# `splunk start` under Ansible, and sudo's env_reset strips it on the direct
+# path. Written only when the compose file sets the variable, and only once
+# Ansible has created the file (first boot is a fresh install, no precheck).
+ensure_cpu_check_skip() {
+    local key="SPLUNK_SKIP_PREINSTALL_CPU_CHECKS_CORRUPTING_DATA_IF_UNSUPPORTED"
+    local conf="${SPLUNK_HOME}/etc/splunk-launch.conf"
+    [ "${!key:-}" = "1" ] || return 0
+    [ -f "${conf}" ] || return 0
+    if grep -q "^${key}=" "${conf}"; then
+        return 0
+    fi
+    echo "entrypoint-wrapper: writing ${key}=1 to splunk-launch.conf"
+    # A file without a trailing newline would glue the setting onto its last line.
+    local script="[ -n \"\$(tail -c1 '${conf}')\" ] && echo >> '${conf}'; echo '${key}=1' >> '${conf}'"
+    if [ "$(whoami)" != "${SPLUNK_USER}" ]; then
+        sudo -u "${SPLUNK_USER}" bash -c "${script}"
+    else
+        bash -c "${script}"
+    fi
+}
+
 # ── Main ─────────────────────────────────────────────────────────────
 CMD="${1:-start-service}"
+ensure_cpu_check_skip
 
 if should_skip_provision "$CMD"; then
     start_without_provision
