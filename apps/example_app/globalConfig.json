@@ -1,84 +1,138 @@
 {
-    "pages": {
-        "configuration": {
-            "tabs": [
-                {
-                    "name": "account",
-                    "table": {
-                        "actions": ["edit", "delete", "clone"],
-                        "header": [
-                            {"label": "Name", "field": "name"}
-                        ]
-                    },
-                    "entity": [
-                        {
-                            "type": "text",
-                            "label": "Name",
-                            "field": "name",
-                            "required": true,
-                            "help": "Unique name for this account"
-                        },
-                        {
-                            "type": "text",
-                            "label": "API Key",
-                            "field": "api_key",
-                            "required": true,
-                            "encrypted": true,
-                            "help": "Your API key"
-                        }
-                    ],
-                    "title": "Accounts"
-                }
+  "pages": {
+    "configuration": {
+      "tabs": [
+        {
+          "name": "account",
+          "table": {
+            "actions": [
+              "edit",
+              "delete",
+              "clone"
             ],
-            "title": "Configuration",
-            "description": "Configure your accounts and settings."
-        },
-        "inputs": {
-            "services": [
-                {
-                    "name": "example_input",
-                    "title": "Example Input",
-                    "entity": [
-                        {
-                            "type": "text",
-                            "label": "Name",
-                            "field": "name",
-                            "required": true
-                        },
-                        {
-                            "type": "singleSelect",
-                            "label": "Account",
-                            "field": "account",
-                            "required": true,
-                            "options": {
-                                "referenceName": "account"
-                            }
-                        },
-                        {
-                            "type": "interval",
-                            "label": "Interval",
-                            "field": "interval",
-                            "required": true,
-                            "defaultValue": "300"
-                        },
-                        {
-                            "type": "index",
-                            "label": "Index",
-                            "field": "index",
-                            "defaultValue": "default"
-                        }
-                    ]
-                }
-            ],
-            "title": "Inputs",
-            "description": "Configure data inputs."
+            "header": [
+              {
+                "label": "Name",
+                "field": "name"
+              }
+            ]
+          },
+          "entity": [
+            {
+              "type": "text",
+              "label": "Name",
+              "field": "name",
+              "required": true,
+              "help": "Unique name for this account"
+            },
+            {
+              "type": "text",
+              "label": "API Key",
+              "field": "api_key",
+              "required": true,
+              "encrypted": true,
+              "help": "Your API key"
+            }
+          ],
+          "title": "Accounts"
         }
+      ],
+      "title": "Configuration",
+      "description": "Configure your accounts and settings."
     },
-    "meta": {
-        "name": "example_app",
-        "restRoot": "example_app",
-        "version": "0.1.0",
-        "displayName": "Example Splunk Add-on",
-        "schemaVersion": "0.0.10"
+    "inputs": {
+      "services": [
+        {
+          "name": "example_input",
+          "title": "Example Input",
+          "entity": [
+            {
+              "type": "text",
+              "label": "Name",
+              "field": "name",
+              "required": true
+            },
+            {
+              "type": "singleSelect",
+              "label": "Account",
+              "field": "account",
+              "required": true,
+              "options": {
+                "referenceName": "account"
+              }
+            },
+            {
+              "type": "interval",
+              "label": "Interval",
+              "field": "interval",
+              "required": true,
+              "defaultValue": "300"
+            },
+            {
+              "type": "index",
+              "label": "Index",
+              "field": "index",
+              "defaultValue": "default"
+            }
+          ]
+        }
+      ],
+      "title": "Inputs",
+      "description": "Configure data inputs.",
+      "table": {
+        "actions": [
+          "edit",
+          "delete",
+          "clone"
+        ],
+        "header": [
+          {
+            "label": "Name",
+            "field": "name"
+          },
+          {
+            "label": "Interval",
+            "field": "interval"
+          },
+          {
+            "label": "Index",
+            "field": "index"
+          },
+          {
+            "label": "Status",
+            "field": "disabled"
+          }
+        ],
+        "moreInfo": [
+          {
+            "label": "Name",
+            "field": "name"
+          },
+          {
+            "label": "Interval",
+            "field": "interval"
+          },
+          {
+            "label": "Index",
+            "field": "index"
+          },
+          {
+            "label": "Status",
+            "field": "disabled",
+            "mapping": {
+              "true": "Inactive",
+              "false": "Active"
+            }
+          }
+        ]
+      }
     }
+  },
+  "meta": {
+    "name": "example_app",
+    "restRoot": "example_app",
+    "version": "0.1.0",
+    "displayName": "Example Splunk Add-on",
+    "schemaVersion": "0.0.10"
+  }
 }
